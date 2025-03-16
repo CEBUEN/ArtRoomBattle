@@ -928,11 +928,6 @@ GameObject:
   - component: {fileID: 4964369038758938671}
   - component: {fileID: 1468805952773828741}
   - component: {fileID: 1781854220979315008}
-  - component: {fileID: -244179644775575659}
-  - component: {fileID: 1358345855160740317}
-  - component: {fileID: 9023050956026333888}
-  - component: {fileID: 4691953887918704770}
-  - component: {fileID: 1226586257121022143}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1041,85 +1036,6 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &-244179644775575659
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5907756145660971178}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c5ef59fcacde8ab4a9cfd15e42989421, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  controller: {fileID: 5216641699635938024}
-  playerCamera: {fileID: 8608052531435758386}
-  speed: 6
-  jumpHeight: 2
-  gravity: -9.81
-  mouseSensitivity: 100
---- !u!114 &1358345855160740317
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5907756145660971178}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e2e12d569afbf1479d4e5d2be8fae74, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ammoPrefab: {fileID: 8397484812380773814, guid: 9eb351324a65fb84292c995d1e07ccf4, type: 3}
-  shootForce: 20
-  shootOffset: 1.5
-  verticalOffset: 1
-  playerCamera: {fileID: 8221768830944800913}
-  shootSound: {fileID: 8300000, guid: 5d8588adb4731c042ae507629c58ba7c, type: 3}
---- !u!114 &9023050956026333888
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5907756145660971178}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4971e4b3e44dea54981327ace434b888, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  respawnPoint: {fileID: 0}
-  invincibilityDuration: 2
---- !u!114 &4691953887918704770
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5907756145660971178}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b61319a6ed2557f4b978fe2f9e7fcc00, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  splatImage: {fileID: 0}
-  splatDuration: 2
-  splatSound: {fileID: 0}
---- !u!114 &1226586257121022143
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5907756145660971178}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 53f709862b4d03c4ab0301149ff32ff6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 100
-  respawnSystem: {fileID: 0}
 --- !u!1 &6090544727360396669
 GameObject:
   m_ObjectHideFlags: 0
