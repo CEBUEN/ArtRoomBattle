@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
     public CharacterController controller;
     public Transform playerCamera;
@@ -15,11 +16,20 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
+        // Ensure that only the host or the owning client controls the player
+        if (!IsOwner && !IsHost)
+        {
+            enabled = false;
+            return;
+        }
+
         Cursor.lockState = CursorLockMode.Locked;
     }
 
     void Update()
     {
+        if (!IsOwner && !IsHost) return; // Only allow movement for the owner or host
+
         // Mouse Look
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;

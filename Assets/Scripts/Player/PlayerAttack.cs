@@ -1,19 +1,34 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerShooting : MonoBehaviour
+public class PlayerShooting : NetworkBehaviour
 {
-    public GameObject ammoPrefab; // Assign your ammo prefab in the Inspector
-    public float shootForce = 20f; // Adjust the force applied to the ammo
-    public float shootOffset = 1.5f; // Distance in front of the player to spawn the ammo
+    public GameObject ammoPrefab; // Assign in Inspector
+    public float shootForce = 20f;
+    public float shootOffset = 1.5f; // Distance in front of the player
     public float verticalOffset = 1.0f; // Height offset for bullet spawning
-    public Camera playerCamera; // Reference to the player's camera
+    private Camera playerCamera; // This will be assigned dynamically
 
-    [SerializeField] private AudioClip shootSound; // Assign the shooting sound in the Inspector
+    [SerializeField] private AudioClip shootSound; // Assign in Inspector
     private AudioSource audioSource;
 
     void Start()
     {
-        // Ensure an AudioSource is attached to the player
+        // Disable script for remote players
+        if (!IsOwner)
+        {
+            enabled = false;
+            return;
+        }
+
+        // Assign the correct camera for the local player
+        playerCamera = GetComponentInChildren<Camera>(); // Finds the first camera in the player's children
+        if (playerCamera == null)
+        {
+            Debug.LogError("Player camera not found!");
+        }
+
+        // Ensure an AudioSource is attached
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
         {
@@ -23,6 +38,8 @@ public class PlayerShooting : MonoBehaviour
 
     void Update()
     {
+        if (!IsOwner) return; // Only allow local player to shoot
+
         if (Input.GetMouseButtonDown(0)) // Left mouse button
         {
             Shoot();
@@ -31,40 +48,48 @@ public class PlayerShooting : MonoBehaviour
 
     void Shoot()
     {
+        if (playerCamera == null) return; // Prevent shooting if camera is missing
+
         // Play shooting sound
         if (shootSound != null)
         {
             audioSource.PlayOneShot(shootSound);
         }
 
-        // Raycast to detect where the cursor is pointing in the world
+        // Raycast from the player's camera to determine shooting direction
         Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         Vector3 targetPoint;
 
-        if (Physics.Raycast(ray, out hit)) // If the ray hits something
+        if (Physics.Raycast(ray, out hit))
         {
             targetPoint = hit.point;
         }
-        else // Default to a point far away in the direction of the cursor
+        else
         {
-            targetPoint = ray.GetPoint(100f); // 100 units away from the camera
+            targetPoint = ray.GetPoint(100f); // Default to a distant point
         }
 
-        // Calculate the direction from the player's position to the target point
+        // Calculate shooting direction
         Vector3 shootDirection = (targetPoint - transform.position).normalized;
 
-        // Adjust the spawn position for the ammo
+        // Calculate ammo spawn position
         Vector3 shootPosition = transform.position + shootDirection * shootOffset + new Vector3(0, verticalOffset, 0);
 
-        // Instantiate ammo at the calculated position
-        GameObject ammoInstance = Instantiate(ammoPrefab, shootPosition, Quaternion.identity);
+        // Spawn the ammo with a server command
+        ShootServerRpc(shootPosition, shootDirection);
+    }
 
-        // Apply force to the ammo's Rigidbody
+    [ServerRpc]
+    void ShootServerRpc(Vector3 spawnPosition, Vector3 direction)
+    {
+        GameObject ammoInstance = Instantiate(ammoPrefab, spawnPosition, Quaternion.identity);
+        ammoInstance.GetComponent<NetworkObject>().Spawn(); // Network spawn
+
         Rigidbody rb = ammoInstance.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.AddForce(shootDirection * shootForce, ForceMode.Impulse);
+            rb.AddForce(direction * shootForce, ForceMode.Impulse);
         }
     }
 }
