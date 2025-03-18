@@ -80,7 +80,7 @@ public class PlayerShooting : NetworkBehaviour
         // Calculate bullet spawn position
         Vector3 spawnPos = transform.position + shootDirection * shootOffset + Vector3.up * verticalOffset;
 
-        Debug.Log($"🔫 Shooting from {spawnPos} towards {targetPoint}");
+        // Debug.Log($"🔫 Shooting from {spawnPos} towards {targetPoint}");
 
         // Tell the server to spawn the projectile
         ShootServerRpc(spawnPos, shootDirection);
