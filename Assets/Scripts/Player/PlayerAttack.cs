@@ -1,36 +1,41 @@
 using Unity.Netcode;
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))]
 public class PlayerShooting : NetworkBehaviour
 {
-    public GameObject ammoPrefab; // Assign in Inspector
-    public float shootForce = 20f;
-    public float shootOffset = 1.5f; // Distance in front of the player
-    public float verticalOffset = 1.0f; // Height offset for bullet spawning
-    private Camera playerCamera; // This will be assigned dynamically
+    [Header("References")]
+    public GameObject ammoPrefab; // Ensure this is in NetworkManager Prefabs list
+    private Camera playerCamera;
 
-    [SerializeField] private AudioClip shootSound; // Assign in Inspector
+    [Header("Shooting Settings")]
+    public float shootForce = 20f;
+    public float shootOffset = 1.5f;
+    public float verticalOffset = 1.0f;
+
+    [Header("Audio")]
+    [SerializeField] private AudioClip shootSound;
     private AudioSource audioSource;
 
     void Start()
     {
-        // Disable script for remote players
         if (!IsOwner)
         {
             enabled = false;
             return;
         }
 
-        // Assign the correct camera for the local player
-        playerCamera = GetComponentInChildren<Camera>(); // Finds the first camera in the player's children
-        if (playerCamera == null)
+        // Get local player camera
+        playerCamera = GetComponentInChildren<Camera>();
+        if (!playerCamera)
         {
-            Debug.LogError("Player camera not found!");
+            Debug.LogError("❌ No Camera found on local player for shooting!");
+            return;
         }
 
-        // Ensure an AudioSource is attached
+        // Ensure we have an AudioSource
         audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
+        if (!audioSource)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
         }
@@ -38,58 +43,79 @@ public class PlayerShooting : NetworkBehaviour
 
     void Update()
     {
-        if (!IsOwner) return; // Only allow local player to shoot
+        if (!IsOwner) return;
 
-        if (Input.GetMouseButtonDown(0)) // Left mouse button
+        if (Input.GetMouseButtonDown(0)) // Left-click to shoot
         {
             Shoot();
         }
     }
 
-    void Shoot()
+    private void Shoot()
     {
-        if (playerCamera == null) return; // Prevent shooting if camera is missing
+        if (!playerCamera) return;
 
-        // Play shooting sound
-        if (shootSound != null)
+        // Play local shot sound
+        if (shootSound && audioSource != null)
         {
             audioSource.PlayOneShot(shootSound);
         }
 
-        // Raycast from the player's camera to determine shooting direction
+        // Raycast from the camera to determine shot direction
         Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         Vector3 targetPoint;
 
-        if (Physics.Raycast(ray, out hit))
+        if (Physics.Raycast(ray, out hit, 1000f))
         {
             targetPoint = hit.point;
         }
         else
         {
-            targetPoint = ray.GetPoint(100f); // Default to a distant point
+            targetPoint = ray.GetPoint(100f);
         }
 
-        // Calculate shooting direction
         Vector3 shootDirection = (targetPoint - transform.position).normalized;
 
-        // Calculate ammo spawn position
-        Vector3 shootPosition = transform.position + shootDirection * shootOffset + new Vector3(0, verticalOffset, 0);
+        // Calculate bullet spawn position
+        Vector3 spawnPos = transform.position + shootDirection * shootOffset + Vector3.up * verticalOffset;
 
-        // Spawn the ammo with a server command
-        ShootServerRpc(shootPosition, shootDirection);
+        Debug.Log($"🔫 Shooting from {spawnPos} towards {targetPoint}");
+
+        // Tell the server to spawn the projectile
+        ShootServerRpc(spawnPos, shootDirection);
     }
 
-    [ServerRpc]
-    void ShootServerRpc(Vector3 spawnPosition, Vector3 direction)
+    [ServerRpc(RequireOwnership = false)] // Allow non-owners to call this
+    private void ShootServerRpc(Vector3 spawnPosition, Vector3 direction)
     {
-        GameObject ammoInstance = Instantiate(ammoPrefab, spawnPosition, Quaternion.identity);
-        ammoInstance.GetComponent<NetworkObject>().Spawn(); // Network spawn
+        if (ammoPrefab == null)
+        {
+            Debug.LogError("❌ Ammo prefab is missing! Make sure it is assigned in NetworkManager.");
+            return;
+        }
 
+        GameObject ammoInstance = Instantiate(ammoPrefab, spawnPosition, Quaternion.identity);
+        NetworkObject netObj = ammoInstance.GetComponent<NetworkObject>();
+
+        if (netObj != null)
+        {
+            netObj.Spawn(true); // Spawns across the network
+        }
+        else
+        {
+            Debug.LogError("❌ Spawned bullet is missing NetworkObject component!");
+        }
+
+        // Apply force to bullet
         Rigidbody rb = ammoInstance.GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.AddForce(direction * shootForce, ForceMode.Impulse);
+        }
+        else
+        {
+            Debug.LogError("❌ Ammo prefab is missing a Rigidbody component!");
         }
     }
 }
