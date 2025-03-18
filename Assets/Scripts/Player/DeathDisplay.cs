@@ -4,42 +4,31 @@ using UnityEngine;
 public class DeathDisplay : MonoBehaviour
 {
     [Header("References")]
-    public PlayerHealth playerHealth;
-    public TextMeshProUGUI deathText;
+    [SerializeField] private TextMeshProUGUI deathText;
 
-    private void Start()
+    private void Awake()
     {
-        // Auto-find the PlayerHealth if not assigned
-        if (playerHealth == null)
-        {
-            playerHealth = FindFirstObjectByType<PlayerHealth>();
-            Debug.Log($"PlayerHealth found: {playerHealth != null}");
-        }
-
+        // Check if we've assigned the reference
         if (deathText == null)
         {
             Debug.LogError("Death Text UI element is not assigned!");
         }
         else
         {
-            Debug.Log("Death Text UI element is assigned.");
+            // Initialize text to "Deaths: 0" on Awake
+            deathText.text = "Deaths: 0";
         }
-
-        // Initialize the UI with the current death count
-        RefreshDeath();
     }
 
-    public void RefreshDeath()
+    public void UpdateDeathText(int currentDeaths)
     {
-        // Update the death text UI
-        if (playerHealth != null && deathText != null)
+        // If the reference is valid, update the text
+        if (deathText != null)
         {
-            deathText.text = $"Deaths: {playerHealth.GetDeathCount()}";
-            Debug.Log($"Deaths updated to: {playerHealth.GetDeathCount()}");
-        }
-        else
-        {
-            Debug.LogError("PlayerHealth or DeathText is missing!");
+            // Use simple concatenation or string interpolation:
+            deathText.text = "Deaths: " + currentDeaths;
+            // or
+            // deathText.text = $"Deaths: {currentDeaths}";
         }
     }
 }

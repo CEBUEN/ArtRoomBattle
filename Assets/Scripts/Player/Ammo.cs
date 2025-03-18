@@ -3,7 +3,7 @@ using UnityEngine;
 public class Ammo : MonoBehaviour
 {
     public float lifespan = 5f; // Time before the ammo is destroyed
-    public int damage = 10; // Damage dealt by the ammo
+    public int damage = 10;     // Damage dealt by the ammo
 
     private Rigidbody rb;
 
@@ -24,17 +24,12 @@ public class Ammo : MonoBehaviour
     void Update()
     {
         // Debug check: Log velocity to confirm ammo is moving
-        if (rb != null)
-        {
-            if (rb.linearVelocity.magnitude > 0.1f)
-            {
-                // Debug.Log($"Ammo is flying! Velocity: {rb.velocity}");
-            }
-            else
-            {
-                //Debug.Log("Ammo is not moving!");
-            }
-        }
+        // (commented out for cleanliness)
+        // if (rb != null && rb.velocity.magnitude > 0.1f)
+        // {
+        //     Debug.Log($"Ammo is flying! Velocity: {rb.velocity}");
+        // }
+
         // Disable gravity so it won't drop and lose momentum
         rb.useGravity = false;
 
@@ -45,22 +40,28 @@ public class Ammo : MonoBehaviour
         Destroy(gameObject, lifespan);
     }
 
-
     void OnCollisionEnter(Collision collision)
     {
-        // Check if we hit an enemy
+        // 1) If we hit an Enemy, deal damage to the Enemy
         if (collision.gameObject.CompareTag("Enemy"))
         {
             EnemyAI enemyAI = collision.gameObject.GetComponent<EnemyAI>();
             if (enemyAI != null)
             {
-                // Apply damage to the enemy
                 enemyAI.TakeDamage(damage);
+            }
+        }
+        // 2) If we hit a Player, deal 20 damage to the Player
+        else if (collision.gameObject.CompareTag("Player"))
+        {
+            PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                playerHealth.TakeDamage(20);
             }
         }
 
         // Destroy the ammo upon collision
-        //Debug.Log($"Ammo hit: {collision.gameObject.name}");
         Destroy(gameObject);
     }
 }
