@@ -1,2 +1,3 @@
 # ArtRoomBattle
- Multiplayer test game for class.
+ Simple 1v1 Player Versus Player Game
+ -Shoot to kill the enemy
